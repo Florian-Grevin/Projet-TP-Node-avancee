@@ -1,0 +1,11 @@
+name,price,stock,description,isArchived
+Produit Valide 1,19.99,10,OK,false
+Produit Valide 2,49.90,5,OK,false
+,29.99,3,Nom manquant,false
+Produit Prix Invalide,abc,12,Erreur prix,false
+Produit Stock Négatif,39.99,-5,Stock négatif,false
+Produit Stock Vide,12.99,,Stock vide,false
+Produit Prix Vide,,8,Prix vide,false
+Produit Invalide,hello,world,Description invalide,false
+Produit Valide 3,9.99,0,OK,false
+Produit Valide 4,59.99,20,OK,false

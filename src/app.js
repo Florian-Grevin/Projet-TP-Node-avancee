@@ -15,6 +15,7 @@ const AppDataSource = require('./config/db');
 const authRoutes = require('./routes/auth.routes');
 const statsRoutes = require('./routes/stats.routes');
 
+const productController = require('./controllers/product.controller');
 const productService = require('./services/product.service');
 
 const app = express();
@@ -181,6 +182,7 @@ app.post('/api/admin/notify/:userId', (req, res) => {
 });
 
 
+app.post('/products/import', (req, res) => productController.importProducts(req, res));
 
 app.get('/products/export', async (req, res) => {
     try {

@@ -1,4 +1,7 @@
 // À ajouter en haut de src/services/product.service.js
+const csv = require('csv-parser'); // Le parser npm
+const ProductValidationTransform = require('../streams/ProductValidationTransform');
+const ProductBatchInsertWritable = require('../streams/ProductBatchInsertWritable');
 const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
 const { stringify } = require('csv-stringify');
@@ -7,6 +10,26 @@ const AppDataSource = require('../config/db');
 
 
 class ProductService { 
+
+    /**
+    * Importe des produits depuis un flux CSV.
+    * @param {Readable} inputStream - Le flux d'entrée (ex: req)
+    */
+    async importProducts(inputStream) {
+        // 1. Instanciation des streams
+        const validationTransform = new ProductValidationTransform();
+        const batchInsertWritable = new ProductBatchInsertWritable({ batchSize: 500 }); // On groupe par 500
+        console.log("🚀 Démarrage du pipeline d'import...");
+        // 2. Création du pipeline
+        // inputStream -> csv() -> validation -> insertion
+        await pipeline(
+        inputStream,
+        csv(), // Convertit le binaire en objets JS bruts
+        validationTransform,
+        batchInsertWritable
+        );
+        console.log("✅ Pipeline d'import terminé avec succès !");
+    }
     async exportProducts(outputStream) {
                 
         const productRepository = AppDataSource.getRepository("Product");

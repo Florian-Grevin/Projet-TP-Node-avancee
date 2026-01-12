@@ -1,6 +1,9 @@
 require('dotenv').config();
 require('reflect-metadata');
 
+const cluster = require('cluster');
+const os = require('os');
+
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
@@ -18,6 +21,7 @@ const heavyRoutes = require('./routes/heavy.routes');
 
 const productController = require('./controllers/product.controller');
 const productService = require('./services/product.service');
+const { isInt16Array } = require('util/types');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -34,6 +38,8 @@ const io = new Server(httpServer, {
 // --- Middlewares Express ---
 app.use(express.json());
 app.use(cookieParser());
+
+
 
 // --- Base de données ---
 // On force TypeORM à connaître nos deux entités : User (déjà là) et Message (nouveau)
@@ -203,8 +209,30 @@ app.get('/products/export', async (req, res) => {
 
 // --- Lancement du serveur ---
 const PORT = process.env.PORT || 3000;
+
+if (cluster.isPrimary) {
+    // ZONE MAITRE
+    nbrCPU = os.availableParallelism()
+    console.log(`Master ${process.pid} is running with ${nbrCPU} CPU available`);
+    for(i=0; i<nbrCPU; i++) {
+        cluster.fork();
+    }
+
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`Worker ${worker.process.pid} est mort. Démarrage d'un remplaçant...`);
+        cluster.fork();
+    });
+
+} else {
+    // ZONE OUVRIER
+    httpServer.listen(PORT, () => {
+        console.log(`Worker ${process.pid} started on port ${PORT}`);
+    });
+}
+
+/*
 httpServer.listen(PORT, () => {
     console.log(`Serveur prêt sur http://localhost:${PORT}`);
 });
-
+*/
 module.exports = app;

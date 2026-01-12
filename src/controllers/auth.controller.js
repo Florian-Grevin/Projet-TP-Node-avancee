@@ -37,6 +37,7 @@ class AuthController {
     }
 
     getProfile(req, res) {
+        console.log(process.pid) 
         if (!req.isAuthenticated()) {
             return res.status(401).json({ message: 'Non autorisé' });
         }

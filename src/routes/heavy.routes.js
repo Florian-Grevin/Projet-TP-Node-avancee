@@ -6,4 +6,7 @@ const HeavyComputationController = require('../controllers/HeavyComputationContr
 router.get('/heavy-task-blocking', HeavyComputationController.blockingTask);
 router.get('/heavy-task-worker', HeavyComputationController.workerTask);
 router.get('/heavy-task-piscina', HeavyComputationController.piscinaTask);
+
+router.get('/kill-me', (req, res) => process.exit(1));
+
 module.exports = router;

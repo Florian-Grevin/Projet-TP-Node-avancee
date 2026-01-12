@@ -14,6 +14,7 @@ const AppDataSource = require('./config/db');
 
 const authRoutes = require('./routes/auth.routes');
 const statsRoutes = require('./routes/stats.routes');
+const heavyRoutes = require('./routes/heavy.routes');
 
 const productController = require('./controllers/product.controller');
 const productService = require('./services/product.service');
@@ -68,6 +69,7 @@ app.use(passport.session());
 // --- Routes ---
 app.use('/', authRoutes);
 app.use('/', statsRoutes);
+app.use('/', heavyRoutes);
 
 // --- Servir le client-test.html ---
 app.use(express.static('public'));

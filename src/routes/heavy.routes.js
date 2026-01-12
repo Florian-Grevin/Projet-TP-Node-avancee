@@ -8,5 +8,7 @@ router.get('/heavy-task-worker', HeavyComputationController.workerTask);
 router.get('/heavy-task-piscina', HeavyComputationController.piscinaTask);
 
 router.get('/kill-me', (req, res) => process.exit(1));
+router.get('/backup-db', HeavyComputationController.backupDb);
+
 
 module.exports = router;

@@ -1,6 +1,8 @@
 const { Worker } = require('worker_threads');
+const process = require('process');
 const Piscina = require('piscina');
 const path = require('path');
+const { exec } = require('child_process');
 
 // Pool avec 100 workers
 const pool = new Piscina({
@@ -11,6 +13,39 @@ const pool = new Piscina({
 
 
 class HeavyComputationController {
+
+    static async backupDb(req, res) {
+        console.log(`[${process.pid}] Demande de backup reçue (Main Thread)`);
+        
+        // Définir la commande système à exécuter
+        const command = process.platform === 'win32' ? 'dir' : 'ls -la';
+
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                return res.status(500).json({
+                    status: 'error',
+                    message: 'La commande a échoué',
+                    parentPid: process.pid,
+                    error: error.message,
+                    stderr: stderr
+                });
+            }
+
+            // Ce ne sont pas forcément des crashs, juste des logs d'avertissement du processus.
+            if (stderr) {
+                console.warn(`[WARNING]${stderr}`)
+            }
+            console.log(`[${process.pid}] Backup terminé avec succès`);
+
+            return res.json({
+                status: 'success',
+                message: 'Backup simulation executed',
+                parentPid: process.pid,
+                output: stdout
+            });
+        });
+    }
+
     static async blockingTask(req, res) {
         console.log(`[${process.pid}] Début de la tâche bloquante...`);
         const startTime = Date.now();

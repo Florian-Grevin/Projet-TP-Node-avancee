@@ -1,6 +1,5 @@
 // src/streams/ProductBatchInsertWritable.js
 const { Writable } = require('stream');
-const AppDataSource = require('../config/db');
 
 class ProductBatchInsertWritable extends Writable {
     constructor(options = {}) {
@@ -9,8 +8,12 @@ class ProductBatchInsertWritable extends Writable {
         this.batchSize = options.batchSize || 1000;
         this.batch = [];
 
-        this.productRepository = AppDataSource.getRepository("Product");
-    }
+        // TODO: Récupérer le repository depuis options.repository
+        this.productRepository = options.repository;
+        if (!this.productRepository) {
+            throw new Error('ProductBatchInsertWritable nécessite un repository !');
+	    }
+	}
 
     async _write(chunk, encoding, callback) {
     // 1. Ajouter au buffer

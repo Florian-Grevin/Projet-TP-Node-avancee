@@ -4,7 +4,7 @@ class BaseService {
 */
 constructor(repository) {
 // TODO: Injecter le repository (this.repository = ...)
-    this.repo = repository;
+    this.repository = repository;
 }
 async findAll() {
 // TODO: Appeler la méthode findAll du repository

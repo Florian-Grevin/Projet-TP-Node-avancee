@@ -15,14 +15,13 @@ const RedisStore = require('connect-redis').default;
 const redis = require('./config/redis');
 const AppDataSource = require('./config/db');
 
-const userRoutes = require('./routes/user.routes');
-const authRoutes = require('./routes/auth.routes');
-const statsRoutes = require('./routes/stats.routes');
-const heavyRoutes = require('./routes/heavy.routes');
+//const userRoutes = require('./routes/user.routes');
+//const authRoutes = require('./routes/auth.routes');
+//const productRoutes = require('./routes/product.routes');
+//const statsRoutes = require('./routes/stats.routes');
+//const heavyRoutes = require('./routes/heavy.routes');
 
-const productController = require('./controllers/product.controller');
-const productService = require('./services/product.service');
-const { isInt16Array } = require('util/types');
+//const { isInt16Array } = require('util/types');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -44,11 +43,29 @@ app.use(cookieParser());
 
 // --- Base de données ---
 // On force TypeORM à connaître nos deux entités : User (déjà là) et Message (nouveau)
-AppDataSource.setOptions({ entities: [require('./entities/User'), require('./entities/Message'), require('./entities/Product') ]
+AppDataSource.setOptions({ 
+    entities: [
+        require('./entities/User'), 
+        require('./entities/Message'), 
+        require('./entities/Product') 
+    ]
 });
 
 AppDataSource.initialize()
-    .then(() => console.log('Database connected (SQLite)'))
+    .then(() => {
+        console.log('Database connected (SQLite)');
+
+        // Maintenant que la DB est prête, on peut créer les controllers
+        const { createControllers } = require('./container');
+        const { userController, authController, productController } = createControllers();
+
+        // Et on injecte les controllers dans les routes
+        app.use('/users', require('./routes/user.routes')(userController));
+        app.use('/', require('./routes/auth.routes')(authController));
+        app.use('/products', require('./routes/product.routes')(productController));
+        app.use('/', require('./routes/stats.routes'));
+        app.use('/', require('./routes/heavy.routes'));
+    })
     .catch((err) => console.error('Database connection error:', err));
 
 const messageRepository = AppDataSource.getRepository('Message');
@@ -75,10 +92,9 @@ app.use(passport.session());
 
 
 // --- Routes ---
-app.use('/users', userRoutes);
-app.use('/', authRoutes);
-app.use('/', statsRoutes);
-app.use('/', heavyRoutes);
+//app.use('/', productRoutes);
+//app.use('/', statsRoutes);
+//app.use('/', heavyRoutes);
 
 // --- Servir le client-test.html ---
 app.use(express.static('public'));
@@ -193,22 +209,6 @@ app.post('/api/admin/notify/:userId', (req, res) => {
 });
 
 
-app.post('/products/import', (req, res) => productController.importProducts(req, res));
-
-app.get('/products/export', async (req, res) => {
-    try {
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename="products.csv"');
-
-        await productService.exportProducts(res);
-
-    } catch (err) {
-        console.error("❌ Erreur export CSV :", err);
-        res.status(500).send("Erreur lors de l'export des produits");
-    }
-});
-
-
 // --- Lancement du serveur ---
 const PORT = process.env.PORT || 3000;
 
@@ -231,10 +231,4 @@ if (cluster.isPrimary) {
         console.log(`Worker ${process.pid} started on port ${PORT}`);
     });
 }
-
-/*
-httpServer.listen(PORT, () => {
-    console.log(`Serveur prêt sur http://localhost:${PORT}`);
-});
-*/
 module.exports = app;

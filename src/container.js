@@ -1,22 +1,29 @@
 const AppDataSource = require('./config/db');
 
 const UserRepository = require('./repositories/UserRepository');
+const ProductRepository = require('./repositories/ProductRepository');
+
 const UserService = require('./services/UserService');
-const UserController = require('./controllers/UserController');
-
 const AuthService = require('./services/AuthService');
-const AuthController = require('./controllers/auth.controller'); // On va le refactoriser
+const ProductService = require('./services/ProductService');
 
+const UserController = require('./controllers/UserController');
+const AuthController = require('./controllers/auth.controller');
+const ProductController = require('./controllers/ProductController');
 
-const userRepository = new UserRepository(AppDataSource);
+function createControllers() {
+    const userRepository = new UserRepository(AppDataSource);
+    const productRepository = new ProductRepository(AppDataSource);
 
-const userService = new UserService(userRepository);
-const authService = new AuthService(userRepository);
+    const userService = new UserService(userRepository);
+    const authService = new AuthService(userRepository);
+    const productService = new ProductService(productRepository);
 
-const userController = new UserController(userService);
-const authController = new AuthController(authService);
+    return {
+        userController: new UserController(userService),
+        authController: new AuthController(authService),
+        productController: new ProductController(productService)
+    };
+}
 
-module.exports = {
-    userController,
-    authController
-};
+module.exports = { createControllers };

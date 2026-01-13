@@ -8,7 +8,7 @@ const AuthService = require('./services/AuthService');
 const ProductService = require('./services/ProductService');
 
 const UserController = require('./controllers/UserController');
-const AuthController = require('./controllers/auth.controller');
+const AuthController = require('./controllers/AuthController');
 const ProductController = require('./controllers/ProductController');
 
 function createControllers() {

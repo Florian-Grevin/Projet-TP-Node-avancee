@@ -8,7 +8,6 @@ class ProductBatchInsertWritable extends Writable {
         this.batchSize = options.batchSize || 1000;
         this.batch = [];
 
-        // TODO: Récupérer le repository depuis options.repository
         this.productRepository = options.repository;
         if (!this.productRepository) {
             throw new Error('ProductBatchInsertWritable nécessite un repository !');
@@ -37,7 +36,6 @@ class ProductBatchInsertWritable extends Writable {
     async _final(callback) {
         try {
             console.log('🏁 Fin du flux. Écriture des derniers éléments...');
-            // TODO: Si le batch n'est pas vide, appeler flushBatch()
             if (this.batch.length > 0) {
                 await this.flushBatch();
             }

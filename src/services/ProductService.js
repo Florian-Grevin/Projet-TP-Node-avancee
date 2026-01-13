@@ -17,17 +17,12 @@ class ProductService extends BaseService {
     */
     async importProducts(inputStream) {
         const validationTransform = new ProductValidationTransform();
-        // TODO: Instancier ProductBatchInsertWritable
         // ATTENTION : Il faut lui passer le repository pour qu'il puisse sauvegarder !
         const batchInsertWritable = new ProductBatchInsertWritable({
             repository: this.repository.repo,
             batchSize: 500
         });
 
-
-        // TODO: Mettre en place le pipeline : inputStream -> csv() -> validation -> batchInsert
-        // await pipeline(...)
-        // inputStream -> csv() -> validation -> insertion
         await pipeline(
         inputStream,
         csv(), // Convertit le binaire en objets JS bruts
@@ -44,14 +39,12 @@ class ProductService extends BaseService {
         const repo = this.repository.repo;
         // Générateur async pour lire la BDD ligne par ligne (Memory safe)
         async function* productGenerator() {
-            // TODO: Implémenter la logique de pagination (cursor-based)
-            // pour récupérer les produits par lots de 1000 et les "yield".
             let lastId = 0;
             const batchSize = 1000;
             while (true) {
                 // Log pour vérifier que la pagination se fait bien
                 console.log(`📦 Fetching batch starting after ID ${lastId}...`);
-                // TODO: Construire la requête avec QueryBuilder
+
                 const products = await repo.createQueryBuilder("product")
                 .select(["product.id", "product.name", "product.price", "product.stock",
                 "product.description", "product.isArchived"])
@@ -70,12 +63,10 @@ class ProductService extends BaseService {
             }
         }
         const queryStream = Readable.from(productGenerator());
-        // TODO: Configurer stringify (csv-stringify) avec les colonnes
         const csvTransformer = stringify({
             header: true,
             columns: ["id", "name", "price", "stock", "description", "isArchived"]
         });
-        // TODO: Pipeline : queryStream -> stringify -> outputStream
         // 3. Exécution du pipeline (connecte Source -> CSV -> Sortie)
         // Le 'await' permet d'attendre que tout le transfert soit terminé avant de finir la fonction
         await pipeline(

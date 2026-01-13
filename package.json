@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "test": "jest --runInBand",
     "benchmark": "node scripts/benchmark.js"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "autocannon": "^7.15.0",
+    "jest": "^30.2.0",
     "nodemon": "^3.0.1"
   }
 }

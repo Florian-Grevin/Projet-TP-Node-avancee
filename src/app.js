@@ -15,6 +15,7 @@ const RedisStore = require('connect-redis').default;
 const redis = require('./config/redis');
 const AppDataSource = require('./config/db');
 
+const userRoutes = require('./routes/user.routes');
 const authRoutes = require('./routes/auth.routes');
 const statsRoutes = require('./routes/stats.routes');
 const heavyRoutes = require('./routes/heavy.routes');
@@ -74,6 +75,7 @@ app.use(passport.session());
 
 
 // --- Routes ---
+app.use('/users', userRoutes);
 app.use('/', authRoutes);
 app.use('/', statsRoutes);
 app.use('/', heavyRoutes);

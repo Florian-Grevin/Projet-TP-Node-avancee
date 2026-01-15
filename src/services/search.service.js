@@ -22,10 +22,19 @@ class SearchService {
                 body: {
                 mappings: {
                     properties: {
-                        title: { type: 'text' },
+                        title: {
+                            type: 'text', // 1. Pour la recherche (comme avant)
+                            fields: {
+                                // 2. SOUS-CHAMP pour le Tri
+                                // On pourra l'appeler via "title.raw"
+                                raw: { type: 'keyword' }
+                            }
+                        },
                         content: { type: 'text' },
                         tags: { type: 'keyword' },
-                        created_at: { type: 'date' }
+                        created_at: { type: 'date' },
+                        // --- AJOUT POUR L'AUTOCOMPLÉTION (TP 4) ---
+                        suggest: { type: 'completion' }
                     }
                 }
                 }
@@ -44,13 +53,19 @@ class SearchService {
         if (!posts || posts.length === 0) return;
         try {
             const operations = posts.flatMap(post => [
-            { index: { _index: this.index, _id: post.id.toString() } },
-            {
-            title: post.title,
-            content: post.content,
-            tags: post.tags,
-            created_at: post.created_at
-            }
+                { 
+                    index: { _index: this.index, _id: post.id.toString() } 
+                },
+                {
+                    title: post.title,
+                    content: post.content,
+                    tags: post.tags,
+                    created_at: post.created_at,
+                    // On nourrit le suggester avec les mots du titre
+                    suggest: {
+                        input: post.title.split(' ')
+                    }
+                }   
             ]);
             const bulkResponse = await client.bulk({
                 refresh: true,

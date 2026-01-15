@@ -7,9 +7,11 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest --runInBand --detectOpenHandles",
+    "test:cov": "jest --coverage --runInBand",
     "benchmark": "node scripts/benchmark.js"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "~8.11.0",
     "bcryptjs": "^3.0.3",
     "connect-redis": "^7.1.0",
     "cookie-parser": "^1.4.7",

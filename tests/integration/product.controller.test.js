@@ -5,7 +5,6 @@ jest.mock('../../src/container', () => {
 
     // On fabrique un faux ProductService
     const mockProductService = {
-        // TODO: Faire en sorte que findAll retourne une liste avec 1 produit fictif
         findAll: jest.fn().mockResolvedValue([
             { id: 1, name: 'Fake Product', price: 99 }
         ]),
@@ -49,7 +48,6 @@ jest.mock('../../src/container', () => {
 jest.mock('../../src/config/passport', () => ({
     // On surcharge le middleware initialize pour injecter un user factice
     initialize: () => (req, res, next) => {
-        // TODO: Forcer isAuthenticated à true
         req.isAuthenticated = () => true;
         req.user = { id: 1, username: 'TestAdmin' };
         next();
@@ -72,12 +70,9 @@ describe('Product API Integration', () => {
     describe('GET /products', () => {
         it('devrait retourner la liste des produits mockés (200 OK)', async () => {
         // ACT
-        // TODO: Utiliser supertest pour appeler la route GET /products
         const response = await request(app).get('/products');
         // ASSERT
-        // TODO: Vérifier le code status 200
         expect(response.status).toBe(200);
-        // TODO: Vérifier que le corps de la réponse contient bien notre produit fictif
         expect(response.body.data).toHaveLength(1);
         expect(response.body.data[0].name).toBe('Fake Product');
         });

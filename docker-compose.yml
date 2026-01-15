@@ -9,8 +9,12 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - ELASTIC_NODE=http://elasticsearch:9200      
     depends_on:
-      - redis
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - app-network
     volumes:
@@ -26,9 +30,38 @@ services:
     networks:
       - app-network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - app-network
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   redis_data:
+  elastic_data:

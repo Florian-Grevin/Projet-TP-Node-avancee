@@ -1,6 +1,7 @@
 // server.js
 require('dotenv').config();
 require('reflect-metadata');
+require('./config/elastic');
 
 const http = require('http');
 const cluster = require('cluster');
@@ -10,6 +11,7 @@ const { Server } = require("socket.io");
 const AppDataSource = require('./config/db');
 //const { app, sessionMiddleware } = require('./app');
 const appModule = require('./app');
+
 const app = appModule.app || appModule; // si test → appModule = app
 const sessionMiddleware = appModule.sessionMiddleware; // undefined en test (OK)
 

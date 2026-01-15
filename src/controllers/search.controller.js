@@ -29,6 +29,7 @@ class SearchController {
     /**
     * Route GET /search?q=...
     */
+   /*
     search = async (req, res) => {
         try {
             const { q } = req.query;
@@ -48,6 +49,24 @@ class SearchController {
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Erreur serveur lors de la recherche' });
+        }
+    }*/
+    search = async (req, res) => {
+        try {
+            // Récupération des paramètres (Query Params)
+            const { q, page, limit, sort, tag } = req.query;
+            console.log(`[SEARCH] q="${q || '*'}" tag="${tag || 'Aucun'}" sort="${sort || 'Pertinence'}"`);
+            const results = await this.searchService.searchPosts({
+                q,
+                page: page ? parseInt(page) : 1,
+                limit: limit ? parseInt(limit) : 10,
+                sort, // ex: 'date' ou 'title'
+                filterTag: tag // ex: 'Node.js'
+            });
+            res.json(results);
+        } catch (error) {
+            console.error('Search error:', error);
+            res.status(500).json({ error: 'Internal server error' });
         }
     }
 }

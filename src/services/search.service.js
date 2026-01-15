@@ -88,31 +88,78 @@ class SearchService {
     * @param {string} query - Le terme recherché (ex: "node performance")
     * @returns {Array} - Liste des résultats formatés
     */
-    async searchPosts(query) {
+    async searchPosts({ q, page = 1, limit = 10, sort, filterTag }) {
         try {
-        // Construire la requête Elastic
-        const result = await client.search({
-        index: this.index,
-        body: {
-            query: {
+            // 1. Calcul de la pagination
+            const from = (page - 1) * limit;
+            const size = parseInt(limit);
+            // 2. Construction du squelette de la requête Bool
+            const queryBody = {
+            bool: {
+                must: [], // Pour la recherche textuelle (Score)
+                filter: [] // Pour les filtres exacts (Performance)
+            }
+            };
+            // 3. Gestion de la recherche textuelle (q)
+            if (q) {
+            queryBody.bool.must.push({
                 multi_match: {
-                    query: query,
-                    fields: ['title^3', 'content'], // ^3 donne 3x plus d'importance au titre !
-                    fuzziness: 'AUTO' // Optionnel : gère les petites fautes de frappe
+                    query: q,
+                    fields: ['title^3', 'content'], // Le titre pèse 3x plus lourd
+                    type: 'phrase_prefix' // Permet de trouver "nod" pour "node"
+                }
+            });
+            } else {
+                // Si pas de recherche, on veut tout voir (Select *)
+                queryBody.bool.must.push({ match_all: {} });
+            }
+            // 4. Gestion du Filtre par Tag (filterTag)
+            if (filterTag) {
+                queryBody.bool.filter.push({
+                term: { tags: filterTag } // "term" cherche la valeur EXACTE dans un champ keyword
+                });
+            }
+            // 5. Gestion du Tri (sort)
+            const sortBody = [];
+            if (sort === 'date') {
+                sortBody.push({ created_at: 'desc' });
+            } else if (sort === 'title') {
+                // ATTENTION : On trie sur le champ RAW (keyword), pas sur le champ text !
+                sortBody.push({ 'title.raw': 'asc' });
+            }
+            // 6. Exécution de la requête
+            const result = await client.search({
+                index: this.index,
+                body: {
+                    from,
+                    size,
+                    query: queryBody,
+                    sort: sortBody,
+                    // 7. Agrégations (Facettes)
+                    // On demande à Elastic de compter les articles par tag.
+                    aggs: {
+                    tags_count: {
+                        terms: { field: 'tags' }
+                    }
                     }
                 }
-            }
-        });
-        // Nettoyer la réponse
-        return result.hits.hits.map(hit => ({
-            id: hit._id,
-            score: hit._score, // Le score de pertinence (plus c'est haut, mieux c'est)
-            ...hit._source // Les données originales (title, content, ...)
-        }));
+            });
+            // 8. Formatage de la réponse
+            return {
+                hits: result.hits.hits.map(hit => ({
+                id: hit._id,
+                score: hit._score,
+                ...hit._source
+            })),
+            total: result.hits.total.value,
+            // On renvoie les facettes pour le front
+            aggregations: result.aggregations ? result.aggregations.tags_count.buckets : []
+            };
         } catch (error) {
-            console.error('❌ Erreur de recherche :', error.message);
-            return []; // On retourne un tableau vide en cas d'erreur pour ne pas casser le front
+            console.error('Error searching posts:', error.message);
+            return { hits: [], total: 0, aggregations: [] };
         }
     }
+
 }
 module.exports = SearchService;

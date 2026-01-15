@@ -3,6 +3,12 @@ require('dotenv').config();
 require('reflect-metadata');
 require('./config/elastic');
 
+const SearchService = require('./services/search.service')
+// Instancier le service et appeler la méthode initIndex()
+const searchService = new SearchService();
+searchService.initIndex()
+    .catch(err => console.error("Erreur lors de l'initialisation de l'index :", err));
+
 const http = require('http');
 const cluster = require('cluster');
 const os = require('os');
@@ -14,7 +20,6 @@ const appModule = require('./app');
 
 const app = appModule.app || appModule; // si test → appModule = app
 const sessionMiddleware = appModule.sessionMiddleware; // undefined en test (OK)
-
 
 const PORT = process.env.PORT || 3000;
 

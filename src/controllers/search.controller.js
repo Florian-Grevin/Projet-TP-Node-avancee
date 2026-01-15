@@ -25,5 +25,30 @@ class SearchController {
             res.status(500).json({ error: 'Erreur de synchronisation' });
         }
     }
+
+    /**
+    * Route GET /search?q=...
+    */
+    search = async (req, res) => {
+        try {
+            const { q } = req.query;
+            // Validation basique
+            if (!q || q.length < 2) {
+            return res.status(400).json({ error: 'Le paramètre de recherche "q" est trop court.' });
+            }
+            console.log(`[SEARCH] Recherche pour : "${q}"`);
+            // Appel du service
+            const results = await this.searchService.searchPosts(q);
+            // Réponse
+            res.json({
+                query: q,
+                count: results.length,
+                results: results
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Erreur serveur lors de la recherche' });
+        }
+    }
 }
 module.exports = SearchController;

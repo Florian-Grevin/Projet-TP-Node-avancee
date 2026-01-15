@@ -46,7 +46,7 @@ app.use(express.static('public'));
 app.use('/users', require('./routes/user.routes')(userController));
 app.use('/', require('./routes/auth.routes')(authController));
 app.use('/products', require('./routes/product.routes')(productController));
-app.use('/search', require('./routes/search.routes')(searchController));
+app.use('/', require('./routes/search.routes')(searchController));
 app.use('/', require('./routes/stats.routes'));
 app.use('/', require('./routes/heavy.routes'));
 

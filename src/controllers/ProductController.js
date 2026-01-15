@@ -32,5 +32,9 @@ class ProductController extends BaseController {
             }
         }
     }
+
+    async getAll(req, res) { 
+        const results = await this.service.findAll(); res.status(200).json({ data: results }); 
+    }
 }
 module.exports = ProductController;

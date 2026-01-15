@@ -67,5 +67,37 @@ class SearchService {
             console.error(' Erreur critique Bulk :', error.message);
         }
     }
+
+    /**
+    * Effectue une recherche Full Text sur les articles.
+    * @param {string} query - Le terme recherché (ex: "node performance")
+    * @returns {Array} - Liste des résultats formatés
+    */
+    async searchPosts(query) {
+        try {
+        // Construire la requête Elastic
+        const result = await client.search({
+        index: this.index,
+        body: {
+            query: {
+                multi_match: {
+                    query: query,
+                    fields: ['title^3', 'content'], // ^3 donne 3x plus d'importance au titre !
+                    fuzziness: 'AUTO' // Optionnel : gère les petites fautes de frappe
+                    }
+                }
+            }
+        });
+        // Nettoyer la réponse
+        return result.hits.hits.map(hit => ({
+            id: hit._id,
+            score: hit._score, // Le score de pertinence (plus c'est haut, mieux c'est)
+            ...hit._source // Les données originales (title, content, ...)
+        }));
+        } catch (error) {
+            console.error('❌ Erreur de recherche :', error.message);
+            return []; // On retourne un tableau vide en cas d'erreur pour ne pas casser le front
+        }
+    }
 }
 module.exports = SearchService;

@@ -9,7 +9,7 @@ const RedisStore = require('connect-redis').default;
 const redis = require('./config/redis');
 const passport = require('./config/passport');
 
-const { createControllers } = require('./container');
+const { userController, authController, productController, searchController } = require('./container');
 
 const app = express();
 
@@ -39,13 +39,14 @@ app.use(passport.session());
 app.use(express.static('public'));
 
 // Controllers
-const { userController, authController, productController } = createControllers();
+//const { userController, authController, productController, searchController } = createControllers();
 
 
 // Routes
 app.use('/users', require('./routes/user.routes')(userController));
 app.use('/', require('./routes/auth.routes')(authController));
 app.use('/products', require('./routes/product.routes')(productController));
+app.use('/search', require('./routes/search.routes')(searchController));
 app.use('/', require('./routes/stats.routes'));
 app.use('/', require('./routes/heavy.routes'));
 

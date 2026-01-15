@@ -138,9 +138,19 @@ class SearchService {
                     // 7. Agrégations (Facettes)
                     // On demande à Elastic de compter les articles par tag.
                     aggs: {
-                    tags_count: {
-                        terms: { field: 'tags' }
-                    }
+                        tags_count: {
+                            terms: { field: 'tags' }
+                        }
+                    },
+                    highlight: {
+                        fields: {
+                            // On veut surligner dans le titre ET le contenu
+                            title: {},
+                            content: {}
+                        },
+                        // Balises HTML à utiliser autour des mots trouvés
+                        pre_tags: ['<mark class="highlight">'], // Début du surlignage
+                        post_tags: ['</mark>'] // Fin du surlignage
                     }
                 }
             });
@@ -149,7 +159,10 @@ class SearchService {
                 hits: result.hits.hits.map(hit => ({
                 id: hit._id,
                 score: hit._score,
-                ...hit._source
+                ...hit._source,
+                // Elastic renvoie un objet highlight séparé de _source
+                // Ex: { title: ["Tutoriel <mark>Node</mark>..."] }
+                highlight: hit.highlight
             })),
             total: result.hits.total.value,
             // On renvoie les facettes pour le front

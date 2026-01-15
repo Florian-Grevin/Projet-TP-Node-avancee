@@ -2,11 +2,11 @@
   "name": "nodejs-advanced-j5",
   "version": "1.0.0",
   "description": "Node.js Advanced - Day 5: Redis & Performances",
-  "main": "src/app.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "test": "jest --runInBand",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest --runInBand --detectOpenHandles",
     "benchmark": "node scripts/benchmark.js"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
   "devDependencies": {
     "autocannon": "^7.15.0",
     "jest": "^30.2.0",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "supertest": "^7.2.2"
   }
 }

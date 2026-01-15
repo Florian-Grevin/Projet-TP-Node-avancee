@@ -6,19 +6,19 @@ constructor(repository) {
     this.repository = repository;
 }
 async findAll() {
-    return await this.repo.findAll();
+    return await this.repository.findAll();
 }
 async findById(id) {
-    return await this.repo.findById(id);
+    return await this.repository.findById(id);
 }
 async create(data) {
-    return await this.repo.create(data);
+    return await this.repository.create(data);
 }
 async update(id, data) {
-    return await this.repo.update(id,data);
+    return await this.repository.update(id,data);
 }
 async delete(id) {
-    return await this.repo.delete(id);
+    return await this.repository.delete(id);
 }
 }
 module.exports = BaseService;

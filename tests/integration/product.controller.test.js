@@ -13,10 +13,16 @@ jest.mock('../../src/container', () => {
     };
     // On instancie le VRAI contrôleur avec le FAUX service
     const ProductController = require('../../src/controllers/ProductController');
-    const controller = new ProductController(mockProductService);
+    const productController = new ProductController(mockProductService);
     // Helper pour les autres contrôleurs qu'on ne teste pas ici
     const dummyController = { handleRequest: () => (req, res, next) => next() };
-    // 🔥 Le bon mock pour AuthController
+
+    // Mock UserController
+    const mockUserController = {
+        handleRequest: () => (req, res, next) => next()
+    };
+
+    // Mock AuthController
     const mockAuthController = {
         register: () => (req, res, next) => next(),
         login: () => (req, res, next) => next(),
@@ -25,22 +31,26 @@ jest.mock('../../src/container', () => {
         handleRequest: () => (req, res, next) => next()
     };
 
-
-    // 🔥 Mock minimal pour UserController
-    const mockUserController = {
+    // Mock SearchController
+    const mockSearchController = {
+        indexAll: (req, res, next) => next(),
+        search: jest.fn((req, res, next) => next()),
         handleRequest: () => (req, res, next) => next()
     };
+
     // On retourne l'objet qui remplace le fichier container.js
     return {
-        createControllers: () => ({
         userController: mockUserController,
-        productController: controller,
-        // On met des bouchons pour le reste pour éviter les erreurs de chargement
         authController: mockAuthController,
-        heavyComputationController: dummyController,
-        userRepository: {}, productRepository: {}, messageRepository: {},
-        authService: {}, productService: mockProductService, messageService: {},
-        heavyComputationService: {}
+        productController,
+        searchController: mockSearchController,
+
+        // Optionnel mais utile si d’autres fichiers l’appellent
+        createControllers: () => ({
+            userController: mockUserController,
+            authController: mockAuthController,
+            productController,
+            searchController: mockSearchController
         })
     };
 });

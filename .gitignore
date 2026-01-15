@@ -4,3 +4,4 @@ database.sqlite
 cookies.txt
 test_import.csv
 appold.js
+coverage
